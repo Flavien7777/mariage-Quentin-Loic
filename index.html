@@ -2,61 +2,45 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Mariage – Photos & Vote</title>
   <style>
-    body,html {
-      margin: 0; padding: 1em;
-      font-family: Roboto, sans-serif;
-      text-align: center;
-    }
-    h1 { margin-bottom: .5em; color: #333; }
-    section { margin-bottom: 2em; }
-    iframe {
-      width: 100%; border: none; display: block;
-    }
-    /* Ajuste ces hauteurs si besoin */
-    #uploadFrame  { height: 400px; }
-    #galleryFrame { height: 600px; }
-    #timerFrame   { height:  80px; }
-    #voteFrame    { height: 650px; }
+    body,html{margin:0;padding:1em;font-family:Roboto,sans-serif;text-align:center}
+    h1,h2{color:#333;margin:.5em 0}
+    section{margin:1em auto;max-width:480px;text-align:left}
+    iframe{width:100%;border:none;margin-top:.5em;}
+    /* Ajuste la hauteur si nécessaire */
+    #uploadFrame  { height:400px; }
+    #galleryFrame { height:600px; }
+    #timerFrame   { height: 80px; }
+    #voteFrame    { height:650px; }
   </style>
 </head>
 <body>
-
   <h1>Bienvenue au mariage ! 🎉</h1>
 
   <section>
     <h2>📸 Déposez vos photos</h2>
-    <iframe
-      id="uploadFrame"
-      src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=upload"
-    ></iframe>
+    <iframe id="uploadFrame"
+            src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=upload"></iframe>
   </section>
 
   <section>
     <h2>🖼 Galerie des photos</h2>
-    <iframe
-      id="galleryFrame"
-      src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=gallery"
-    ></iframe>
+    <iframe id="galleryFrame"
+            src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=gallery"></iframe>
   </section>
 
   <section>
-    <h2>⏳ Le timer</h2>
-    <iframe
-      id="timerFrame"
-      src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=timer"
-    ></iframe>
+    <h2>⏳ Timer</h2>
+    <iframe id="timerFrame"
+            src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=timer"></iframe>
   </section>
 
   <section>
     <h2>🗳️ Votez pour vos photos</h2>
-    <iframe
-      id="voteFrame"
-      src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=vote"
-    ></iframe>
+    <iframe id="voteFrame"
+            src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=vote"></iframe>
   </section>
-
 </body>
 </html>
