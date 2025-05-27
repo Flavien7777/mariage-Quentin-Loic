@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Accueil – Mariage</title>
+  <style>
+    body,html{margin:0;padding:1em;font-family:Roboto,sans-serif;text-align:center}
+    h1{margin-bottom:0.5em;color:#333}
+    iframe{width:100%;border:none;margin-bottom:1em;}
+    #uploadFrame{height:360px;}
+    #timerFrame{height:80px;}
+    #voteFrame{height:480px;}
+    #results{display:none;text-align:left;max-width:360px;margin:0 auto}
+    #results h3{margin-bottom:0.5em;color:#333}
+    #results ul{list-style:none;padding:0}
+    #results li{display:flex;align-items:center;margin-bottom:0.5em}
+    #results img{width:40px;height:40px;border-radius:4px;object-fit:cover;margin-right:0.5em}
+  </style>
+</head>
+<body>
+  <h1>Bienvenue au mariage !</h1>
+
+  <!-- Upload -->
+  <iframe id="uploadFrame" src="?page=upload"></iframe>
+  <!-- Timer -->
+  <iframe id="timerFrame" src="?page=timer"></iframe>
+  <!-- Vote (caché au besoin) -->
+  <div id="voteContainer">
+    <iframe id="voteFrame" src="?page=vote"></iframe>
+  </div>
+  <!-- Résultats -->
+  <div id="results">
+    <h3>Résultats des votes</h3>
+    <div id="res-romantic"><strong>La plus romantique :</strong><ul></ul></div>
+    <div id="res-funny"><strong>La plus drôle :</strong><ul></ul></div>
+    <div id="res-original"><strong>La plus originale :</strong><ul></ul></div>
+  </div>
+
+  <script>
+    
+    // Écoute le message quand Timer.html annonce la fin
+    window.addEventListener('message', e => {
+      if (e.data && e.data.type === 'timerEnded') {
+        document.getElementById('voteContainer').style.display = 'none';
+        displayResults();
+      }
+    });
+
+    function displayResults() {
+      google.script.run
+        .withSuccessHandler(renderResults)
+        .getVoteResults();
+    }
+
+    function renderResults(data) {
+      document.getElementById('results').style.display = 'block';
+      ['romantic','funny','original'].forEach(cat => {
+        const ul = document.querySelector(`#res-${cat} ul`);
+        ul.innerHTML = '';
+        Object.entries(data[cat])
+          .sort((a,b) => b[1] - a[1])
+          .forEach(([id,count]) => {
+            const li  = document.createElement('li');
+            const img = document.createElement('img');
+            img.src   = `https://drive.google.com/thumbnail?sz=w100&id=${id}`;
+            li.appendChild(img);
+            li.appendChild(document.createTextNode(`${count} vote(s)`));
+            ul.appendChild(li);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
