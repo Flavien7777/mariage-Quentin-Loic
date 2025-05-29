@@ -76,16 +76,16 @@
     ></iframe>
   </div>
 
-  <script>
-    // Quand un module envoie {type:'resize', page, height},
-    // on adapte la hauteur de l’iframe correspondante.
-    window.addEventListener('message', event => {
-      const data = event.data;
-      if (data && data.type === 'resize' && data.page) {
-        const frame = document.getElementById(data.page + 'Frame');
-        if (frame) frame.style.height = data.height + 'px';
-      }
-    }, false);
-  </script>
+<script>
+  window.addEventListener('message', event => {
+    console.log('🏠 [index.html] message reçu →', event.data);
+    if (event.data && event.data.type === 'resize' && event.data.page) {
+      const frame = document.getElementById(event.data.page + 'Frame');
+      console.log(`🏠 redimensionne iframe "${event.data.page}Frame"`+
+                  ` à ${event.data.height}px`);
+      if (frame) frame.style.height = event.data.height + 'px';
+    }
+  }, false);
+</script>
 </body>
 </html>
