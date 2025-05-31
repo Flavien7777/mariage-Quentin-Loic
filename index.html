@@ -16,7 +16,7 @@
       min-height: 100vh;
     }
 
-    /* ─── Bannière en haut ─── */
+    /* ─── Bannière en haut (100% largeur) ─── */
     header.banner {
       width: 100%;
       overflow: hidden;
@@ -56,12 +56,31 @@
       color: #0d47a1;
     }
 
-    /* Tous les iframes font 100% de la largeur du conteneur */
+    /* Style des boutons “Voir la galerie” et “Déposez vos photos” etc. */
+    .btn-primary {
+      display: block;
+      width: 70%;
+      max-width: 240px;
+      margin: 0.5em auto;
+      padding: 0.8em;
+      background: #1976d2;
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover {
+      background: #0f5ca8;
+    }
+
+    /* Tous les iframes restent en full-width, hauteur à ajuster manuellement */
     iframe {
       width: 100%;
       border: none;
-      /* Vous pourrez ajuster “height” à la main si nécessaire */
-      height: 400px; /* Valeur de base à ajuster manuellement */
+      /* Hauteur de base (à ajuster “à la main” selon votre besoin) */
+      height: 400px;
     }
   </style>
 </head>
@@ -86,14 +105,10 @@
       ></iframe>
     </div>
 
-    <!-- SECTION : Galerie des photos -->
+    <!-- SECTION : Galerie des photos (bouton vers gallery.html) -->
     <div class="section">
       <h2>🖼 Galerie des photos</h2>
-      <iframe
-        id="galleryFrame"
-        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=gallery"
-        scrolling="no"
-      ></iframe>
+      <a href="gallery.html" class="btn-primary">Voir la galerie complète</a>
     </div>
 
     <!-- SECTION : Timer -->
@@ -118,9 +133,8 @@
   </main>
 
   <script>
-    // Si vous souhaitez toujours écouter des messages postMessage pour redimensionner vos iframes :
+    // Si vous conservez la logique postMessage côté Apps Script (resize), laissez ceci :
     window.addEventListener('message', event => {
-      // console.log('🏠 [index.html] message reçu →', event.data);
       if (event.data && event.data.type === 'resize' && event.data.page) {
         const frame = document.getElementById(event.data.page + 'Frame');
         if (frame) {
