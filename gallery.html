@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Galerie des photos</title>
+  <style>
+    /* Reset & mobile‐first */
+    html, body {
+      margin: 0;
+      padding: 1em;
+      font-family: Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .container {
+      background: #fff;
+      margin: 1em auto;
+      padding: 1em;
+      border-radius: 8px;
+      max-width: 480px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    iframe {
+      width: 100%;
+      border: none;
+      /* Hauteur fixe à ajuster si besoin */
+      height: 600px;
+    }
+    /* Bouton retour */
+    .btn-back {
+      display: inline-block;
+      margin-top: 1em;
+      padding: 0.8em 1.2em;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-back:hover {
+      background: #0f5ca8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Galerie des photos</h1>
+
+  <div class="container">
+    <iframe
+      id="galleryFrame"
+      src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=gallery"
+      scrolling="no"
+    ></iframe>
+
+    <!-- Bouton pour revenir à l'accueil (index.html) -->
+    <a href="index.html" class="btn-back">← Retour à l’accueil</a>
+  </div>
+</body>
+</html>
