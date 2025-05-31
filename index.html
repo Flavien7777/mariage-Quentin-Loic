@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Mariage – Photos & Vote</title>
   <style>
-    /* Reset & mobile‐first */
+    /* Reset & mobile-first */
     html, body {
       margin: 0;
       padding: 1em;
@@ -33,12 +33,17 @@
     iframe {
       width: 100%;
       border: none;
-      /* on laisse la hauteur 100% gérée par postMessage */
+      /* hauteur fixe, à ajuster manuellement ci-dessous */
     }
+    /* Hauteurs approximatives (à adapter selon vos tests) */
+    #uploadFrame  { height: 400px; }
+    #galleryFrame { height: 600px; }
+    #timerFrame   { height: 100px; }
+    #voteFrame    { height: 800px; }
   </style>
 </head>
 <body>
-  <h1>Bienvenue au mariage ! 22.18🎉</h1>
+  <h1>Bienvenue au mariage ! 🎉</h1>
 
   <div class="section">
     <h2>📸 Déposez vos photos</h2>
@@ -75,17 +80,5 @@
       scrolling="no"
     ></iframe>
   </div>
-
-<script>
-  window.addEventListener('message', event => {
-    console.log('🏠 [index.html] message reçu →', event.data);
-    if (event.data && event.data.type === 'resize' && event.data.page) {
-      const frame = document.getElementById(event.data.page + 'Frame');
-      console.log(`🏠 redimensionne iframe "${event.data.page}Frame"`+
-                  ` à ${event.data.height}px`);
-      if (frame) frame.style.height = event.data.height + 'px';
-    }
-  }, false);
-</script>
 </body>
 </html>
