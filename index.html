@@ -94,7 +94,7 @@
       height: 1400px; /* ← ajustez à votre convenance */
     }
     #timerFrame {
-      /* Hauteur du module “Timer” */
+      /* Hauteur du module “Timer” (désormais chargé localement) */
       height: 150px; /* ← ajustez à votre convenance */
     }
   </style>
@@ -113,11 +113,10 @@
 
     <!-- ─── SECTION 1 : Déposez vos photos ─── -->
     <div class="section">
-      <!--<h2>📸 Déposez vos photos ici&nbsp;!</h2>
-      
-        ID = “uploadFrame” : 
+      <!--
+        ID = “uploadFrame” :
         • Pour changer sa hauteur, modifiez le CSS #uploadFrame { height: …px; }
-        • Vous pouvez aussi remplacer ici par un attribut inline : height="450px"
+        • Vous pouvez aussi remplacer ici par un attribut inline : height="250px"
       -->
       <iframe
         id="uploadFrame"
@@ -128,11 +127,10 @@
 
     <!-- ─── SECTION 2 : Votez pour vos photos ─── -->
     <div class="section">
-      <!--<h2>🗳️ Votez pour vos photos</h2>
-      
+      <!--
         ID = “voteFrame” :
         • Pour changer sa hauteur, modifiez le CSS #voteFrame { height: …px; }
-        • Vous pouvez mettre inline : height="600px"
+        • Vous pouvez aussi ajouter un attribut inline height="1400px"
       -->
       <iframe
         id="voteFrame"
@@ -143,15 +141,15 @@
 
     <!-- ─── SECTION 3 : Timer (apparaît après les votes) ─── -->
     <div class="section">
-      <!-- <h2>⏳ Timer</h2>
-     
+      <!--
         ID = “timerFrame” :
+        • On le redirige maintenant vers le timer local (timer.html).
         • Pour changer sa hauteur, modifiez le CSS #timerFrame { height: …px; }
-        • Vous pouvez mettre inline : height="500px"
+        • Vous pouvez aussi ajouter un attribut inline height="150px"
       -->
       <iframe
         id="timerFrame"
-        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=timer"
+        src="timer.html"
         scrolling="no"
       ></iframe>
     </div>
