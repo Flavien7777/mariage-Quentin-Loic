@@ -16,23 +16,12 @@
       min-height: 100vh;
     }
 
-    /* ─── Bannière en haut (100 % largeur) ─── */
-    header.banner {
-      width: 100%;
-      overflow: hidden;
-    }
-    header.banner img {
-      display: block;
-      width: 100%;
-      height: auto;
-      object-fit: cover;
-    }
+    /* ─── Bannière en haut ─── */
+    header.banner { width: 100%; overflow: hidden; }
+    header.banner img { display: block; width: 100%; height: auto; object-fit: cover; }
 
     /* ─── Conteneur principal ─── */
-    main {
-      padding: 1em;
-    }
-
+    main { padding: 1em; }
     h1 {
       text-align: center;
       margin: 1em 0;
@@ -55,7 +44,7 @@
       color: #0d47a1;
     }
 
-    /* ─── Boutons principaux (“Voir la galerie”, etc.) ─── */
+    /* ─── Boutons principaux ─── */
     .btn-primary {
       display: block;
       width: 70%;
@@ -70,39 +59,23 @@
       font-size: 1rem;
       transition: background 0.2s;
     }
-    .btn-primary:hover {
-      background: #0f5ca8;
-    }
+    .btn-primary:hover { background: #0f5ca8; }
 
-    /* ─── Styles spécifiques aux iframes ─── */
-    /* Par défaut, on donne à tous les iframes 100 % de la largeur du conteneur, 
-       et une hauteur fixe. Vous pourrez modifier ces hauteurs ligne par ligne. */
+    /* ─── Styles Iframes ─── */
     iframe {
       width: 100%;
       border: none;
-      /* Hauteur par défaut pour tous les iframes (modifiable ici) */
+      /* Hauteur par défaut */
       height: 400px;
     }
-
-    /* Si vous souhaitez surcharger un iframe en particulier, utilisez son ID */
-    #uploadFrame {
-      /* Hauteur du module “Upload” */
-      height: 250px; /* ← ajustez à votre convenance */
-    }
-    #voteFrame {
-      /* Hauteur du module “Vote” */
-      height: 1400px; /* ← ajustez à votre convenance */
-    }
-    #timerFrame {
-      /* Hauteur du module “Timer” (désormais chargé localement) */
-      height: 150px; /* ← ajustez à votre convenance */
-    }
+    #uploadFrame { height: 250px; }   /* Ajustez pour “Upload” */
+    #voteFrame   { height: 1400px; }  /* Ajustez pour “Vote” */
+    #timerFrame  { height: 300px; }   /* Ajustez pour “Timer” – petite hauteur initiale, car le “card” est centré */
   </style>
 </head>
 
 <body>
-
-  <!-- ─── En-tête avec la bannière (image dans /assets/banniere.png) ─── -->
+  <!-- ─── En-tête avec la bannière ─── -->
   <header class="banner">
     <img src="assets/banniere.png"
          alt="Bannière Quentin & Loïc – 14.06.2025" />
@@ -113,58 +86,38 @@
 
     <!-- ─── SECTION 1 : Déposez vos photos ─── -->
     <div class="section">
-      <!--
-        ID = “uploadFrame” :
-        • Pour changer sa hauteur, modifiez le CSS #uploadFrame { height: …px; }
-        • Vous pouvez aussi remplacer ici par un attribut inline : height="250px"
-      -->
       <iframe
         id="uploadFrame"
-        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=upload"
+        src="upload.html"  <!-- ou bien src="upload.html" si vous hébergez un upload.html sur GitHub -->
         scrolling="no"
       ></iframe>
     </div>
 
     <!-- ─── SECTION 2 : Votez pour vos photos ─── -->
     <div class="section">
-      <!--
-        ID = “voteFrame” :
-        • Pour changer sa hauteur, modifiez le CSS #voteFrame { height: …px; }
-        • Vous pouvez aussi ajouter un attribut inline height="1400px"
-      -->
       <iframe
         id="voteFrame"
-        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=vote"
+        src="vote.html"   <!-- vote.html doit également être à la racine du dépôt -->
         scrolling="no"
       ></iframe>
     </div>
 
-    <!-- ─── SECTION 3 : Timer (apparaît après les votes) ─── -->
+    <!-- ─── SECTION 3 : Timer ─── -->
     <div class="section">
-      <!--
-        ID = “timerFrame” :
-        • On le redirige maintenant vers le timer local (timer.html).
-        • Pour changer sa hauteur, modifiez le CSS #timerFrame { height: …px; }
-        • Vous pouvez aussi ajouter un attribut inline height="150px"
-      -->
       <iframe
         id="timerFrame"
-        src="timer.html"
+        src="timer.html"  <!-- Appelle la version GitHub de timer.html -->
         scrolling="no"
       ></iframe>
     </div>
 
-    <!-- ─── SECTION 4 : Galerie des photos (bouton vers gallery.html) ─── -->
+    <!-- ─── SECTION 4 : Galerie (bouton vers une page indépendante) ─── -->
     <div class="section">
       <h2>🖼 Galerie des photos</h2>
-      <!-- 
-        Ce bouton renvoie vers gallery.html, où la galerie s’affichera en plein écran
-      -->
       <a href="gallery.html" class="btn-primary">
         Voir la galerie complète
       </a>
     </div>
   </main>
-
 </body>
 </html>
