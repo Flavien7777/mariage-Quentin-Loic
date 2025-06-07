@@ -65,13 +65,23 @@
     iframe {
       width: 100%;
       border: none;
-      /* Hauteur par défaut */
+      /* Hauteur par défaut (modifiable ci-dessous) */
       height: 400px;
-      background: transparent;
     }
-    #uploadFrame { height: 350px; }   /* Ajustez pour “Upload” */
-    #voteFrame   { height: 1400px; }  /* Ajustez pour “Vote” */
-    #timerFrame  { height: 300px; }   /* Ajustez pour “Timer” – petite hauteur initiale, car le “card” est centré */
+
+    /* — Iframes “GitHub” en transparent — */
+    /* ici on cible uniquement les iframes qui chargent un fichier statique GH (le cas échéant) */
+    iframe[src^="./"][src$=".html"] {
+      background-color: transparent !important;
+    }
+
+    /* — Iframes Apps Script gardent leur fond (on ne les surcharge pas) */
+    /* iframe[src*="script.google.com"] { background: /* on ne touche pas */ } */
+
+    /* Tailles spécifiques : */
+    #uploadFrame { height: 350px; }
+    #voteFrame   { height: 1400px; }
+    #timerFrame  { height: 300px; }
   </style>
 </head>
 
@@ -89,10 +99,9 @@
     <div class="section">
       <iframe
         id="uploadFrame"
-        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=upload"  <!-- ou bien src="upload.html" si vous hébergez un upload.html sur GitHub -->
+        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=upload"
         scrolling="no"
         allowtransparency="true"
-        style="background:transparent;"
       ></iframe>
     </div>
 
@@ -100,10 +109,9 @@
     <div class="section">
       <iframe
         id="voteFrame"
-        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=vote"   <!-- vote.html doit également être à la racine du dépôt -->
+        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=vote"
         scrolling="no"
         allowtransparency="true"
-        style="background:transparent;"
       ></iframe>
     </div>
 
@@ -111,14 +119,13 @@
     <div class="section">
       <iframe
         id="timerFrame"
-        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=timer"  <!-- Appelle la version GitHub de timer.html -->
+        src="https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec?page=timer"
         scrolling="no"
         allowtransparency="true"
-        style="background:transparent;"
       ></iframe>
     </div>
 
-    <!-- ─── SECTION 4 : Galerie (bouton vers une page indépendante) ─── -->
+    <!-- ─── SECTION 4 : Galerie (page statique GitHub) ─── -->
     <div class="section">
       <h2>🖼 Galerie des photos</h2>
       <a href="gallery.html" class="btn-primary">
