@@ -17,11 +17,21 @@
     }
 
     /* ─── Bannière en haut ─── */
-    header.banner { width: 100%; overflow: hidden; }
-    header.banner img { display: block; width: 100%; height: auto; object-fit: cover; }
+    header.banner {
+      width: 100%;
+      overflow: hidden;
+    }
+    header.banner img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
 
     /* ─── Conteneur principal ─── */
-    main { padding: 1em; }
+    main {
+      padding: 1em;
+    }
     h1 {
       text-align: center;
       margin: 1em 0;
@@ -29,14 +39,35 @@
       color: #0d47a1;
     }
 
+    /* ─── Section avec fond de pétales ─── */
     .section {
-      background: #fff;
+      position: relative;
       margin: 1em auto;
       padding: 1em;
       border-radius: 8px;
       max-width: 480px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      /* on supprime le blanc */
+      background-color: transparent;
+      overflow: hidden;
     }
+    /* couche de pétales */
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('assets/petales1.png') center/cover no-repeat;
+      opacity: 0.15; /* ajustez l’opacité selon votre goût */
+      border-radius: 8px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* contenu au-dessus des pétales */
+    .section > * {
+      position: relative;
+      z-index: 1;
+    }
+
     .section h2 {
       font-size: 1.2rem;
       margin: 0 0 0.5em;
@@ -59,26 +90,19 @@
       font-size: 1rem;
       transition: background 0.2s;
     }
-    .btn-primary:hover { background: #0f5ca8; }
+    .btn-primary:hover {
+      background: #0f5ca8;
+    }
 
     /* ─── Styles Iframes ─── */
     iframe {
       width: 100%;
       border: none;
-      /* Hauteur par défaut (modifiable ci-dessous) */
+      background: transparent; /* assure la transparence */
+      /* Hauteur par défaut, overridable ci-dessous */
       height: 400px;
     }
-
-    /* — Iframes “GitHub” en transparent — */
-    /* ici on cible uniquement les iframes qui chargent un fichier statique GH (le cas échéant) */
-    iframe[src^="./"][src$=".html"] {
-      background-color: transparent !important;
-    }
-
-    /* — Iframes Apps Script gardent leur fond (on ne les surcharge pas) */
-    /* iframe[src*="script.google.com"] { background: /* on ne touche pas */ } */
-
-    /* Tailles spécifiques : */
+    /* Tailles spécifiques des modules */
     #uploadFrame { height: 350px; }
     #voteFrame   { height: 1400px; }
     #timerFrame  { height: 300px; }
@@ -88,8 +112,7 @@
 <body>
   <!-- ─── En-tête avec la bannière ─── -->
   <header class="banner">
-    <img src="assets/banniere.png"
-         alt="Bannière Quentin & Loïc – 14.06.2025" />
+    <img src="assets/banniere.png" alt="Bannière Quentin & Loïc – 14.06.2025" />
   </header>
 
   <main>
