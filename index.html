@@ -9,18 +9,22 @@
     /* ─── Reset & mobile‐first ─── */
     html, body {
       background:
-      url('assets/petales2bis.png') center/cover no-repeat fixed;
+        url('assets/petales2bis.png') center/cover no-repeat fixed;
       margin: 0;
       padding: 0;
       font-family: Roboto, sans-serif;
-      background-color: #f5f5f5;
       color: #333;
       min-height: 100vh;
     }
 
     /* ─── Bannière en haut ─── */
     header.banner { width: 100%; overflow: hidden; }
-    header.banner img { display: block; width: 100%; height: auto; object-fit: cover; }
+    header.banner img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
 
     /* ─── Conteneur principal ─── */
     main { padding: 1em; }
@@ -38,10 +42,7 @@
       max-width: 480px;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
-      /* fond de pétales + léger overlay blanc pour lisibilité */
       background:
-        /* en superposition, on met un semi-blanc pour atténuer un peu */
         linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)),
         url('assets/petales2bis.png') center/cover no-repeat;
     }
@@ -73,12 +74,11 @@
     iframe {
       width: 100%;
       border: none;
-      /* fond transparent pour que l’on voie le pétales derrière */
       background: transparent;
-      /* hauteur par défaut, surchargée par ID */
+      /* hauteur par défaut, sera réajustée dynamiquement */
       height: 400px;
     }
-    /* hauteurs personnalisées */
+    /* hauteurs initiales */
     #uploadFrame { height: 350px; }
     #voteFrame   { height: 1400px; }
     #timerFrame  { height: 200px; }
@@ -87,11 +87,12 @@
 
 <body>
   <header class="banner">
-    <img src="assets/banniere.png" alt="Bannière Quentin & Loïc – 14.06.2025" />
+    <img src="assets/banniere.png"
+         alt="Bannière Quentin & Loïc – 14.06.2025" />
   </header>
 
   <main>
-    <h1>Bienvenue au mariage 22.16&nbsp;! 🎉</h1>
+    <h1>Bienvenue au mariage&nbsp;! 🎉</h1>
 
     <!-- 1) Upload -->
     <div class="section">
@@ -131,5 +132,18 @@
       </a>
     </div>
   </main>
+
+  <script>
+    // Écoute les messages postés par les iframes (upload/vote/timer)
+    // et redimensionne automatiquement leur hauteur.
+    window.addEventListener('message', e => {
+      if (!e.data || e.data.type !== 'resize') return;
+      const frameId = e.data.page + 'Frame'; // e.data.page === 'upload'|'vote'|'timer'
+      const iframe  = document.getElementById(frameId);
+      if (iframe && e.data.height) {
+        iframe.style.height = e.data.height + 'px';
+      }
+    });
+  </script>
 </body>
 </html>
