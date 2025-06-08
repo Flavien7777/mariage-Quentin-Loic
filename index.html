@@ -17,21 +17,11 @@
     }
 
     /* ─── Bannière en haut ─── */
-    header.banner {
-      width: 100%;
-      overflow: hidden;
-    }
-    header.banner img {
-      display: block;
-      width: 100%;
-      height: auto;
-      object-fit: cover;
-    }
+    header.banner { width: 100%; overflow: hidden; }
+    header.banner img { display: block; width: 100%; height: auto; object-fit: cover; }
 
     /* ─── Conteneur principal ─── */
-    main {
-      padding: 1em;
-    }
+    main { padding: 1em; }
     h1 {
       text-align: center;
       margin: 1em 0;
@@ -41,33 +31,18 @@
 
     /* ─── Section avec fond de pétales ─── */
     .section {
-      position: relative;
       margin: 1em auto;
       padding: 1em;
-      border-radius: 8px;
       max-width: 480px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      /* on supprime le blanc */
-      background-color: transparent;
-      overflow: hidden;
-    }
-    /* couche de pétales */
-    .section::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: url('assets/petales1.png') center/cover no-repeat;
-      opacity: 0.15; /* ajustez l’opacité selon votre goût */
       border-radius: 8px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    /* contenu au-dessus des pétales */
-    .section > * {
-      position: relative;
-      z-index: 1;
-    }
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 
+      /* fond de pétales + léger overlay blanc pour lisibilité */
+      background:
+        /* en superposition, on met un semi-blanc pour atténuer un peu */
+        linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)),
+        url('assets/petales1.png') center/cover no-repeat;
+    }
     .section h2 {
       font-size: 1.2rem;
       margin: 0 0 0.5em;
@@ -90,19 +65,18 @@
       font-size: 1rem;
       transition: background 0.2s;
     }
-    .btn-primary:hover {
-      background: #0f5ca8;
-    }
+    .btn-primary:hover { background: #0f5ca8; }
 
     /* ─── Styles Iframes ─── */
     iframe {
       width: 100%;
       border: none;
-      background: transparent; /* assure la transparence */
-      /* Hauteur par défaut, overridable ci-dessous */
+      /* fond transparent pour que l’on voie le pétales derrière */
+      background: transparent;
+      /* hauteur par défaut, surchargée par ID */
       height: 400px;
     }
-    /* Tailles spécifiques des modules */
+    /* hauteurs personnalisées */
     #uploadFrame { height: 350px; }
     #voteFrame   { height: 1400px; }
     #timerFrame  { height: 300px; }
@@ -110,7 +84,6 @@
 </head>
 
 <body>
-  <!-- ─── En-tête avec la bannière ─── -->
   <header class="banner">
     <img src="assets/banniere.png" alt="Bannière Quentin & Loïc – 14.06.2025" />
   </header>
@@ -118,7 +91,7 @@
   <main>
     <h1>Bienvenue au mariage&nbsp;! 🎉</h1>
 
-    <!-- ─── SECTION 1 : Déposez vos photos ─── -->
+    <!-- 1) Upload -->
     <div class="section">
       <iframe
         id="uploadFrame"
@@ -128,7 +101,7 @@
       ></iframe>
     </div>
 
-    <!-- ─── SECTION 2 : Votez pour vos photos ─── -->
+    <!-- 2) Vote -->
     <div class="section">
       <iframe
         id="voteFrame"
@@ -138,7 +111,7 @@
       ></iframe>
     </div>
 
-    <!-- ─── SECTION 3 : Timer ─── -->
+    <!-- 3) Timer -->
     <div class="section">
       <iframe
         id="timerFrame"
@@ -148,7 +121,7 @@
       ></iframe>
     </div>
 
-    <!-- ─── SECTION 4 : Galerie (page statique GitHub) ─── -->
+    <!-- 4) Galerie (page statique GitHub) -->
     <div class="section">
       <h2>🖼 Galerie des photos</h2>
       <a href="gallery.html" class="btn-primary">
