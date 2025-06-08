@@ -5,90 +5,30 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Upload Photos</title>
   <style>
-    body, html {
-      margin: 0; padding: 0;
-      font-family: Roboto, sans-serif;
-      background: transparent;
-    }
-    body {
-      display: flex;
-      justify-content: center;
-      padding: 1em;
-    }
-    .card {
-      background: #fff;
-      padding: 1.5em;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
-    }
-    h2 {
-      margin-bottom: 1em;
-      font-size: 1.2rem;
-      color: #333;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 0.6em;
-      margin-bottom: 1em;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    input[type="file"] {
-      display: none;
-    }
-    .btn {
-      display: inline-block;
-      margin-bottom: 1em;
-      padding: 0.8em;
-      background: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .btn:hover {
-      background: #0f5ca8;
-    }
-    #progress {
-      width: 100%;
-      margin: 1em 0;
-      display: none;
-    }
-    #status {
-      min-height: 1.2em;
-      font-weight: bold;
-    }
-    #status.error { color: #d32f2f; }
-    #status.success { color: #2e7d32; }
+    /* … tes styles … */
   </style>
 </head>
 <body>
   <div class="card">
     <h2>📸 Déposez vos photos</h2>
     <input type="text" id="uploader" placeholder="Votre nom">
-    <div class="btn" id="chooseBtn">Sélectionner des photos</div>
-    <input type="file" id="filesInput" multiple accept="image/*">
-    <progress id="progress" value="0" max="0"></progress>
+    <button id="chooseBtn">Sélectionner des photos</button>
+    <input type="file" id="filesInput" multiple accept="image/*" style="display:none">
+    <progress id="progress" value="0" max="0" style="width:100%;display:none"></progress>
     <div id="status"></div>
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/TON_EXEC_URL/exec';
 
+    const uploader   = document.getElementById('uploader');
     const chooseBtn  = document.getElementById('chooseBtn');
     const filesInput = document.getElementById('filesInput');
-    const uploader   = document.getElementById('uploader');
     const progress   = document.getElementById('progress');
     const statusDiv  = document.getElementById('status');
 
     chooseBtn.addEventListener('click', () => {
       statusDiv.textContent = '';
-      statusDiv.className = '';
       if (!uploader.value.trim()) {
         statusDiv.textContent = '🚫 Merci de renseigner votre nom.';
         statusDiv.className = 'error';
@@ -108,16 +48,14 @@
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-
-        // 1) Lecture base64
-        const data = await new Promise((res, rej) => {
+        // Lecture Base64
+        const data = await new Promise(res => {
           const fr = new FileReader();
-          fr.onload  = () => res(fr.result);
-          fr.onerror = () => rej(fr.error);
+          fr.onload = () => res(fr.result);
           fr.readAsDataURL(file);
         });
 
-        // 2) Envoi form-urlencoded (pas de CORS preflight)
+        // Form‐urlencoded (pas de preflight CORS)
         const form = new URLSearchParams();
         form.append('action',   'uploadSingle');
         form.append('name',     file.name);
@@ -126,9 +64,9 @@
 
         try {
           const resp = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: form.toString()
+            method:  'POST',
+            headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+            body:    form.toString()
           });
           const json = await resp.json();
           if (json.status !== 'OK') {
@@ -137,27 +75,25 @@
         } catch (err) {
           statusDiv.textContent = '❌ ' + err.message;
           statusDiv.className = 'error';
-          break;
+          return;
         }
 
-        progress.value = i + 1;
+        progress.value++;
       }
 
-      if (progress.value === progress.max) {
-        statusDiv.textContent = '✅ Upload terminé !';
-        statusDiv.className = 'success';
-        filesInput.value = '';
-      }
+      statusDiv.textContent = '✅ Upload terminé !';
+      statusDiv.className = 'success';
+      filesInput.value = '';
     });
 
-    // Ajuste la hauteur de l'iframe parent
+    // Redimensionnement de l’iframe
     function notifyHeight() {
       window.parent.postMessage(
-        { type:'resize', page:'upload', height: document.body.scrollHeight },
+        { type:'resize', page:'upload', height:document.body.scrollHeight },
         '*'
       );
     }
-    window.addEventListener('load',  notifyHeight);
+    window.addEventListener('load', notifyHeight);
     window.addEventListener('resize', notifyHeight);
   </script>
 </body>
