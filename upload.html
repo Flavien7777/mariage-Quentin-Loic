@@ -6,7 +6,7 @@
   <title>Upload Photos</title>
   <style>
     body, html {
-      margin:0; padding:0;
+      margin: 0; padding: 0;
       font-family: Roboto, sans-serif;
       background: transparent;
     }
@@ -24,19 +24,48 @@
       max-width: 360px;
       text-align: center;
     }
-    input[type="file"] { display: none; }
+    h2 {
+      margin-bottom: 1em;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.6em;
+      margin-bottom: 1em;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input[type="file"] {
+      display: none;
+    }
     .btn {
       display: inline-block;
-      margin: 0.5em 0;
+      margin-bottom: 1em;
       padding: 0.8em;
       background: #1976d2;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      transition: background .2s;
     }
-    .btn:hover { background: #0f5ca8; }
-    #progress { width: 100%; margin: .5em 0; }
+    .btn:hover {
+      background: #0f5ca8;
+    }
+    #progress {
+      width: 100%;
+      margin: 1em 0;
+      display: none;
+    }
+    #status {
+      min-height: 1.2em;
+      color: #333;
+      font-weight: bold;
+    }
+    #status.error { color: #d32f2f; }
+    #status.success { color: #2e7d32; }
   </style>
 </head>
 <body>
@@ -45,85 +74,96 @@
     <input type="text" id="uploader" placeholder="Votre nom">
     <div class="btn" id="chooseBtn">Sélectionner des photos</div>
     <input type="file" id="filesInput" multiple accept="image/*">
-    <progress id="progress" value="0" max="0" style="display:none;"></progress>
+    <progress id="progress" value="0" max="0"></progress>
     <div id="status"></div>
   </div>
 
   <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec';
+    // → Remplace par l'URL de ton Web-App Apps Script (exec sans ?page=…)
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec';
 
-  const chooseBtn = document.getElementById('chooseBtn'),
-        filesInput = document.getElementById('filesInput'),
-        uploader   = document.getElementById('uploader'),
-        progress   = document.getElementById('progress'),
-        statusDiv  = document.getElementById('status');
+    const chooseBtn  = document.getElementById('chooseBtn');
+    const filesInput = document.getElementById('filesInput');
+    const uploader   = document.getElementById('uploader');
+    const progress   = document.getElementById('progress');
+    const statusDiv  = document.getElementById('status');
 
-  chooseBtn.onclick = () => {
-    if (!uploader.value.trim()) {
-      statusDiv.textContent = '🚫 Merci de renseigner votre nom.'; return;
-    }
-    statusDiv.textContent = '';
-    filesInput.click();
-  };
+    // Ouvre le sélecteur uniquement si le nom est rempli
+    chooseBtn.addEventListener('click', () => {
+      statusDiv.textContent = '';
+      statusDiv.className = '';
+      if (!uploader.value.trim()) {
+        statusDiv.textContent = '🚫 Merci de renseigner votre nom.';
+        statusDiv.className = 'error';
+        return;
+      }
+      filesInput.click();
+    });
 
-  filesInput.onchange = async () => {
-    const files = Array.from(filesInput.files);
-    if (!files.length) return;
+    filesInput.addEventListener('change', async () => {
+      const files = Array.from(filesInput.files);
+      if (!files.length) return;
 
-    progress.max = files.length;
-    progress.value = 0;
-    progress.style.display = 'block';
-    statusDiv.textContent = '';
+      // Prépare la barre de progression
+      progress.max = files.length;
+      progress.value = 0;
+      progress.style.display = 'block';
+      statusDiv.textContent = '';
 
-    for (let i=0; i<files.length; i++) {
-      const file = files[i];
-      // Lire en base64
-      const data = await new Promise(r => {
-        const fr = new FileReader();
-        fr.onload = () => r(fr.result);
-        fr.readAsDataURL(file);
-      });
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
 
-      // Envoyer au serveur
-      const payload = {
-        action:   'uploadSingle',
-        name:     file.name,
-        uploader: uploader.value.trim(),
-        data
-      };
-
-      try {
-        const resp = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify(payload)
+        // 1) Lecture du fichier en Base64
+        const data = await new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => resolve(fr.result);
+          fr.onerror = () => reject(fr.error);
+          fr.readAsDataURL(file);
         });
-        const json = await resp.json();
-        if (json.status !== 'OK') {
-          throw new Error(json.message||'Erreur inconnue');
+
+        // 2) Envoi au serveur via POST JSON
+        try {
+          const resp = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action:   'uploadSingle',
+              name:     file.name,
+              uploader: uploader.value.trim(),
+              data:     data
+            })
+          });
+          const json = await resp.json();
+          if (json.status !== 'OK') {
+            throw new Error(json.message || 'Erreur serveur');
+          }
+        } catch (err) {
+          statusDiv.textContent = '❌ ' + err.message;
+          statusDiv.className = 'error';
+          break;
         }
-      } catch (err) {
-        statusDiv.innerHTML = '❌ ' + err.message;
-        break;
+
+        // 3) Mise à jour de la progression
+        progress.value = i + 1;
       }
 
-      progress.value = i+1;
-    }
+      // Si tout s'est bien passé
+      if (progress.value === progress.max) {
+        statusDiv.textContent = '✅ Upload terminé !';
+        statusDiv.className = 'success';
+        filesInput.value = '';
+      }
+    });
 
-    if (progress.value === progress.max) {
-      statusDiv.innerHTML = '✅ Upload terminé !';
-      filesInput.value = '';
+    // Ajuste la hauteur de l'iframe parent si besoin
+    function notifyHeight() {
+      window.parent.postMessage(
+        { type: 'resize', page: 'upload', height: document.body.scrollHeight },
+        '*'
+      );
     }
-  };
-
-  // Lorsqu’on est chargé dans un iframe, ajuste la hauteur
-  function notifyHeight(){
-    window.parent.postMessage(
-      { type:'resize', page:'upload', height: document.body.scrollHeight },
-      '*'
-    );
-  }
-  window.addEventListener('load', notifyHeight);
+    window.addEventListener('load',  notifyHeight);
+    window.addEventListener('resize', notifyHeight);
   </script>
 </body>
 </html>
