@@ -1,119 +1,101 @@
-// Code.gs
-//Drive Quentin
-//const FOLDER_ID = '175KXWtIbVXsu9TD1ANBLdJkueJaEkzF9';
-
-
-//Drive Flavien
-// Code.gs
-
-// === CONFIGURATION ===
-const ADMIN_PASSWORD = 'QLF';
-const FOLDER_ID      = '1GD-BoYO-5udtb2g1NgFxEMS-LWe2ssr6';
-const SHEET_ID       = '1y9vlwk-WlkjVOYo_ksLrhzalytQ17OgtzWpCnecv7jU';
-
-/**
- * doGet : dispatch selon ?page=
- */
-function doGet(e) {
-  const p = (e.parameter.page||'upload').toLowerCase();
-  let file = 'Upload';
-  if (p==='vote')    file='Vote';
-  else if (p==='gallery') file='Gallery';
-  else if (p==='timer')   file='Timer';
-  else if (p==='admin')   file='Admin';
-  return HtmlService
-    .createHtmlOutputFromFile(file)
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-/** Renvoie liste des photos {id,name,url} */
-function getPhotoList() {
-  const folder = DriveApp.getFolderById(FOLDER_ID);
-  const it     = folder.getFiles();
-  const arr    = [];
-  while (it.hasNext()) {
-    const f = it.next();
-    arr.push({
-      id:   f.getId(),
-      name: f.getName(),
-      url:  'https://drive.google.com/thumbnail?sz=w400&id='+f.getId()
-    });
-  }
-  return arr;
-}
-
-/** Upload d’un seul fichier (toujours OK côté serveur) */
-function uploadSingle(file) {
-  const folder = DriveApp.getFolderById(FOLDER_ID);
-  const parts  = file.data.split(',');
-  const mime   = parts[0].match(/data:(.*);base64/)[1];
-  const bytes  = Utilities.base64Decode(parts[1]);
-  const blob   = Utilities.newBlob(bytes, mime, file.name);
-  const f      = folder.createFile(blob);
-  if (file.uploader) f.setDescription('Uploaded by: '+file.uploader);
-  return 'OK';
-}
-
-/** Enregistre le vote (renvoie l’UUID généré) */
-function recordVote(vote) {
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
-  const uuid  = Utilities.getUuid();
-  sheet.appendRow([
-    new Date(),
-    vote.category,
-    vote.photoId,
-    vote.voterName||'',
-    uuid
-  ]);
-  return uuid;
-}
-
-/** Supprime un vote existant par UUID */
-function deleteVote(voteId) {
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
-  const data  = sheet.getDataRange().getValues();
-  for(let i=1;i<data.length;i++){
-    if(data[i][4]===voteId){
-      sheet.deleteRow(i+1);
-      return 'OK';
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Timer – Fin des votes</title>
+  <style>
+    body, html {
+      margin:0; padding:0;
+      font-family: Roboto, sans-serif;
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh; background:transparent;
     }
-  }
-  throw new Error('Vote non trouvé');
-}
-
-// === ADMIN ===
-
-/** Check mot de passe admin */
-function checkAdmin(pwd) {
-  return pwd===ADMIN_PASSWORD;
-}
-
-/** Enregistre date cible (ISO string) */
-function setCountdownTarget(iso) {
-  PropertiesService.getScriptProperties()
-    .setProperty('targetDate',iso);
-  return 'OK';
-}
-
-/** Récupère date cible */
-function getCountdownTarget() {
-  return PropertiesService.getScriptProperties()
-    .getProperty('targetDate')||'';
-}
-
-/** Agrège résultats de vote */
-function getVoteResults() {
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
-  const rows  = sheet.getDataRange().getValues().slice(1);
-  const res   = { romantic:{}, funny:{}, original:{} };
-  rows.forEach(r=>{
-    if(r[1]==='multi'){
-      const sel = JSON.parse(r[2]);
-      ['romantic','funny','original'].forEach(cat=>{
-        const id = sel[cat];
-        res[cat][id] = (res[cat][id]||0)+1;
-      });
+    #timerCard {
+      background:#fff;
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      padding:1.5em 2em; text-align:center;
+      max-width:400px; width:90%;
     }
-  });
-  return res;
-}
+    #timerCard h2 {
+      margin:0; font-size:1.3rem; color:#333;
+      display:flex; align-items:center; justify-content:center; gap:.5em;
+    }
+    #timerCard .icon { font-size:1.4rem; color:#1976d2; }
+    #countdown {
+      margin-top:.75em; font-size:1.5rem; font-weight:500;
+      color:#1976d2; letter-spacing:.02em;
+    }
+    #countdown.finished { color:#d32f2f; }
+  </style>
+</head>
+<body>
+  <div id="timerCard">
+    <h2><span class="icon">⏳</span><span>Fin des votes dans :</span></h2>
+    <div id="countdown">Chargement…</div>
+  </div>
+
+  <script>
+    // 1) notification de hauteur au parent
+    function notifyHeight() {
+      window.parent.postMessage({
+        type: 'resize',
+        page: 'timer',
+        height: document.body.scrollHeight
+      }, '*');
+    }
+    window.addEventListener('load', notifyHeight);
+
+    // 2) démarrage du JSONP
+    function handleCountdown(data) {
+      if (!data || !data.target) {
+        showFinished('Non configuré');
+        return;
+      }
+      startCountdown(new Date(data.target).getTime());
+    }
+
+    // 3) insère dynamiquement le <script> JSONP
+    (function() {
+      var s = document.createElement('script');
+      s.src = 'https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec'
+            + '?action=getCountdownTarget'
+            + '&callback=handleCountdown';
+      document.head.appendChild(s);
+    })();
+
+    // 4) compte à rebours pur JS
+    var intervalId;
+    function startCountdown(targetTime) {
+      var el = document.getElementById('countdown');
+
+      function update() {
+        var diff = targetTime - Date.now();
+        if (diff > 0) {
+          var d = Math.floor(diff/86400000),
+              h = Math.floor((diff%86400000)/3600000),
+              m = Math.floor((diff%3600000)/60000),
+              s = Math.floor((diff%60000)/1000);
+          el.textContent = d+'j '+h+'h '+m+'m '+s+'s';
+        } else {
+          clearInterval(intervalId);
+          showFinished('Le vote est terminé !');
+          window.parent.postMessage({ type:'timerEnded' }, '*');
+        }
+        notifyHeight();
+      }
+
+      update();
+      intervalId = setInterval(update, 1000);
+    }
+
+    function showFinished(txt) {
+      var el = document.getElementById('countdown');
+      el.textContent = txt;
+      el.classList.add('finished');
+      notifyHeight();
+    }
+  </script>
+</body>
+</html>
