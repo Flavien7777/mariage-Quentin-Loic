@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Upload Photos</title>
+  <style>
+    body, html {
+      margin:0; padding:0;
+      font-family: Roboto, sans-serif;
+      background: transparent;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 1em;
+    }
+    .card {
+      background: #fff;
+      padding: 1.5em;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    input[type="file"] { display: none; }
+    .btn {
+      display: inline-block;
+      margin: 0.5em 0;
+      padding: 0.8em;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn:hover { background: #0f5ca8; }
+    #progress { width: 100%; margin: .5em 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>📸 Déposez vos photos</h2>
+    <input type="text" id="uploader" placeholder="Votre nom">
+    <div class="btn" id="chooseBtn">Sélectionner des photos</div>
+    <input type="file" id="filesInput" multiple accept="image/*">
+    <progress id="progress" value="0" max="0" style="display:none;"></progress>
+    <div id="status"></div>
+  </div>
+
+  <script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec';
+
+  const chooseBtn = document.getElementById('chooseBtn'),
+        filesInput = document.getElementById('filesInput'),
+        uploader   = document.getElementById('uploader'),
+        progress   = document.getElementById('progress'),
+        statusDiv  = document.getElementById('status');
+
+  chooseBtn.onclick = () => {
+    if (!uploader.value.trim()) {
+      statusDiv.textContent = '🚫 Merci de renseigner votre nom.'; return;
+    }
+    statusDiv.textContent = '';
+    filesInput.click();
+  };
+
+  filesInput.onchange = async () => {
+    const files = Array.from(filesInput.files);
+    if (!files.length) return;
+
+    progress.max = files.length;
+    progress.value = 0;
+    progress.style.display = 'block';
+    statusDiv.textContent = '';
+
+    for (let i=0; i<files.length; i++) {
+      const file = files[i];
+      // Lire en base64
+      const data = await new Promise(r => {
+        const fr = new FileReader();
+        fr.onload = () => r(fr.result);
+        fr.readAsDataURL(file);
+      });
+
+      // Envoyer au serveur
+      const payload = {
+        action:   'uploadSingle',
+        name:     file.name,
+        uploader: uploader.value.trim(),
+        data
+      };
+
+      try {
+        const resp = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await resp.json();
+        if (json.status !== 'OK') {
+          throw new Error(json.message||'Erreur inconnue');
+        }
+      } catch (err) {
+        statusDiv.innerHTML = '❌ ' + err.message;
+        break;
+      }
+
+      progress.value = i+1;
+    }
+
+    if (progress.value === progress.max) {
+      statusDiv.innerHTML = '✅ Upload terminé !';
+      filesInput.value = '';
+    }
+  };
+
+  // Lorsqu’on est chargé dans un iframe, ajuste la hauteur
+  function notifyHeight(){
+    window.parent.postMessage(
+      { type:'resize', page:'upload', height: document.body.scrollHeight },
+      '*'
+    );
+  }
+  window.addEventListener('load', notifyHeight);
+  </script>
+</body>
+</html>
