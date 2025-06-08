@@ -61,7 +61,6 @@
     }
     #status {
       min-height: 1.2em;
-      color: #333;
       font-weight: bold;
     }
     #status.error { color: #d32f2f; }
@@ -79,7 +78,6 @@
   </div>
 
   <script>
-    // → Remplace par l'URL de ton Web-App Apps Script (exec sans ?page=…)
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrcQVBEjTMNyx0maHhCzpLMacF3J9sgE4qnD8XF8Km2t-qeHeIIk7DfTh_GbuQHEi1Kg/exec';
 
     const chooseBtn  = document.getElementById('chooseBtn');
@@ -88,7 +86,6 @@
     const progress   = document.getElementById('progress');
     const statusDiv  = document.getElementById('status');
 
-    // Ouvre le sélecteur uniquement si le nom est rempli
     chooseBtn.addEventListener('click', () => {
       statusDiv.textContent = '';
       statusDiv.className = '';
@@ -104,7 +101,6 @@
       const files = Array.from(filesInput.files);
       if (!files.length) return;
 
-      // Prépare la barre de progression
       progress.max = files.length;
       progress.value = 0;
       progress.style.display = 'block';
@@ -113,25 +109,26 @@
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        // 1) Lecture du fichier en Base64
-        const data = await new Promise((resolve, reject) => {
+        // 1) Lecture base64
+        const data = await new Promise((res, rej) => {
           const fr = new FileReader();
-          fr.onload = () => resolve(fr.result);
-          fr.onerror = () => reject(fr.error);
+          fr.onload  = () => res(fr.result);
+          fr.onerror = () => rej(fr.error);
           fr.readAsDataURL(file);
         });
 
-        // 2) Envoi au serveur via POST JSON
+        // 2) Envoi form-urlencoded (pas de CORS preflight)
+        const form = new URLSearchParams();
+        form.append('action',   'uploadSingle');
+        form.append('name',     file.name);
+        form.append('uploader', uploader.value.trim());
+        form.append('data',     data);
+
         try {
           const resp = await fetch(SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action:   'uploadSingle',
-              name:     file.name,
-              uploader: uploader.value.trim(),
-              data:     data
-            })
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: form.toString()
           });
           const json = await resp.json();
           if (json.status !== 'OK') {
@@ -143,11 +140,9 @@
           break;
         }
 
-        // 3) Mise à jour de la progression
         progress.value = i + 1;
       }
 
-      // Si tout s'est bien passé
       if (progress.value === progress.max) {
         statusDiv.textContent = '✅ Upload terminé !';
         statusDiv.className = 'success';
@@ -155,10 +150,10 @@
       }
     });
 
-    // Ajuste la hauteur de l'iframe parent si besoin
+    // Ajuste la hauteur de l'iframe parent
     function notifyHeight() {
       window.parent.postMessage(
-        { type: 'resize', page: 'upload', height: document.body.scrollHeight },
+        { type:'resize', page:'upload', height: document.body.scrollHeight },
         '*'
       );
     }
