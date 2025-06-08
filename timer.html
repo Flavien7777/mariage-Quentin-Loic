@@ -1,0 +1,119 @@
+// Code.gs
+//Drive Quentin
+//const FOLDER_ID = '175KXWtIbVXsu9TD1ANBLdJkueJaEkzF9';
+
+
+//Drive Flavien
+// Code.gs
+
+// === CONFIGURATION ===
+const ADMIN_PASSWORD = 'QLF';
+const FOLDER_ID      = '1GD-BoYO-5udtb2g1NgFxEMS-LWe2ssr6';
+const SHEET_ID       = '1y9vlwk-WlkjVOYo_ksLrhzalytQ17OgtzWpCnecv7jU';
+
+/**
+ * doGet : dispatch selon ?page=
+ */
+function doGet(e) {
+  const p = (e.parameter.page||'upload').toLowerCase();
+  let file = 'Upload';
+  if (p==='vote')    file='Vote';
+  else if (p==='gallery') file='Gallery';
+  else if (p==='timer')   file='Timer';
+  else if (p==='admin')   file='Admin';
+  return HtmlService
+    .createHtmlOutputFromFile(file)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+/** Renvoie liste des photos {id,name,url} */
+function getPhotoList() {
+  const folder = DriveApp.getFolderById(FOLDER_ID);
+  const it     = folder.getFiles();
+  const arr    = [];
+  while (it.hasNext()) {
+    const f = it.next();
+    arr.push({
+      id:   f.getId(),
+      name: f.getName(),
+      url:  'https://drive.google.com/thumbnail?sz=w400&id='+f.getId()
+    });
+  }
+  return arr;
+}
+
+/** Upload d’un seul fichier (toujours OK côté serveur) */
+function uploadSingle(file) {
+  const folder = DriveApp.getFolderById(FOLDER_ID);
+  const parts  = file.data.split(',');
+  const mime   = parts[0].match(/data:(.*);base64/)[1];
+  const bytes  = Utilities.base64Decode(parts[1]);
+  const blob   = Utilities.newBlob(bytes, mime, file.name);
+  const f      = folder.createFile(blob);
+  if (file.uploader) f.setDescription('Uploaded by: '+file.uploader);
+  return 'OK';
+}
+
+/** Enregistre le vote (renvoie l’UUID généré) */
+function recordVote(vote) {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
+  const uuid  = Utilities.getUuid();
+  sheet.appendRow([
+    new Date(),
+    vote.category,
+    vote.photoId,
+    vote.voterName||'',
+    uuid
+  ]);
+  return uuid;
+}
+
+/** Supprime un vote existant par UUID */
+function deleteVote(voteId) {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
+  const data  = sheet.getDataRange().getValues();
+  for(let i=1;i<data.length;i++){
+    if(data[i][4]===voteId){
+      sheet.deleteRow(i+1);
+      return 'OK';
+    }
+  }
+  throw new Error('Vote non trouvé');
+}
+
+// === ADMIN ===
+
+/** Check mot de passe admin */
+function checkAdmin(pwd) {
+  return pwd===ADMIN_PASSWORD;
+}
+
+/** Enregistre date cible (ISO string) */
+function setCountdownTarget(iso) {
+  PropertiesService.getScriptProperties()
+    .setProperty('targetDate',iso);
+  return 'OK';
+}
+
+/** Récupère date cible */
+function getCountdownTarget() {
+  return PropertiesService.getScriptProperties()
+    .getProperty('targetDate')||'';
+}
+
+/** Agrège résultats de vote */
+function getVoteResults() {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
+  const rows  = sheet.getDataRange().getValues().slice(1);
+  const res   = { romantic:{}, funny:{}, original:{} };
+  rows.forEach(r=>{
+    if(r[1]==='multi'){
+      const sel = JSON.parse(r[2]);
+      ['romantic','funny','original'].forEach(cat=>{
+        const id = sel[cat];
+        res[cat][id] = (res[cat][id]||0)+1;
+      });
+    }
+  });
+  return res;
+}
